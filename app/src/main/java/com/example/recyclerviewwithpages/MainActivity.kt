@@ -1,12 +1,16 @@
 package com.example.recyclerviewwithpages
 
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
+import android.widget.Toast
+import com.example.recyclerviewwithpages.EventBus.PageEvent
 import kotlinx.android.synthetic.main.activity_main.*
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
 
 
 class MainActivity : AppCompatActivity() {
@@ -17,6 +21,7 @@ class MainActivity : AppCompatActivity() {
     //todo get last position
     var positions_on_one_page = 9
     val number_of_items = 150
+    var lastScrollIntoPosition = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,4 +60,34 @@ class MainActivity : AppCompatActivity() {
         recyclerview_with_pages.setAdapter(numbersAdapter)
     }
 
+    @Subscribe
+    fun onResponse(event: PageEvent) {
+        val message = event.getMessage()
+        if (message != -1) {
+            if (lastScrollIntoPosition > (positions_on_one_page * message) + (positions_on_one_page - 1)) {
+                gridViewLayoutManager.scrollToPosition((positions_on_one_page * message))
+                lastScrollIntoPosition = (positions_on_one_page * message) + (positions_on_one_page - 1)
+            } else {
+                gridViewLayoutManager.scrollToPosition((positions_on_one_page * message) + (positions_on_one_page - 1))
+                lastScrollIntoPosition = (positions_on_one_page * message) + (positions_on_one_page - 1)
+            }
+            Log.e("xyz", "scroll to position: " + (lastScrollIntoPosition))
+
+        }
+        //else if ( message == "update") {}
+        else {
+            //TODO handle error
+            Toast.makeText(this, "There has been an error.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun onPause() {
+        EventBus.getDefault().unregister(this);
+        super.onPause()
+    }
+
+    override fun onResume() {
+        EventBus.getDefault().register(this);
+        super.onResume()
+    }
 }

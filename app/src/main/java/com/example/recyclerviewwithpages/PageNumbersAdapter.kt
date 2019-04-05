@@ -6,6 +6,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import com.example.recyclerviewwithpages.EventBus.PageEvent
+import org.greenrobot.eventbus.EventBus
 
 /**
  * Created by Sophie on 2/28/2019.
@@ -21,15 +23,16 @@ class PageNumbersAdapter(val numberOfPages: Int) : RecyclerView.Adapter<PageNumb
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val context = holder.page_number.context
-        if(position == chosen_number){
+        if (position == chosen_number) {
             holder.page_number.setBackgroundResource(R.drawable.bckg_card_background_chosen)
         } else {
             holder.page_number.setBackgroundResource(R.drawable.bckg_card_background)
         }
-        holder.page_number.setText((position+1).toString())
+        holder.page_number.setText((position + 1).toString())
         holder.page_number.setOnClickListener {
             chosen_number = position
             //TODO post to change teh page
+            EventBus.getDefault().post(PageEvent(chosen_number))
             notifyDataSetChanged()
         }
     }
@@ -48,7 +51,7 @@ class PageNumbersAdapter(val numberOfPages: Int) : RecyclerView.Adapter<PageNumb
         }
     }
 
-    public fun setCataloguePage(int: Int){
+    public fun setCataloguePage(int: Int) {
         chosen_number = int
         notifyDataSetChanged()
     }
